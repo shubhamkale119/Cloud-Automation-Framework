@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>SQS Management</title>
+    <link rel="stylesheet" href="{{ url_for('serve_sqs_static_files', path='styles.css') }}">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <h1>SQS Management</h1>
+    <h2>Create SQS Queue</h2>
+    <form id="sqsForm">
+        <label for="queue_name">Queue Name:</label>
+        <input type="text" id="queue_name" name="queue_name" required>
+        <label for="delay_seconds">Delay Seconds:</label>
+        <input type="number" id="delay_seconds" name="delay_seconds">
+        <label for="maximum_message_size">Maximum Message Size:</label>
+        <input type="number" id="maximum_message_size" name="maximum_message_size">
+        <label for="message_retention_period">Message Retention Period:</label>
+        <input type="number" id="message_retention_period" name="message_retention_period">
+        <label for="environment_tag">Environment Tag:</label>
+        <input type="text" id="environment_tag" name="environment_tag">
+        <label for="owner_tag">Owner Tag:</label>
+        <input type="text" id="owner_tag" name="owner_tag">
+        <button type="submit">Create Queue</button>
+    </form>
+    <div id="result"></div>
+
+    <script>
+        $(document).ready(function(){
+            $("#sqsForm").submit(function(event){
+                event.preventDefault();
+
+                var formData = {
+                    "queue_name": $("#queue_name").val(),
+                    "delay_seconds": $("#delay_seconds").val(),
+                    "maximum_message_size": $("#maximum_message_size").val(),
+                    "message_retention_period": $("#message_retention_period").val(),
+                    "environment_tag": $("#environment_tag").val(),
+                    "owner_tag": $("#owner_tag").val()
+                };
+
+                $.ajax({
+                    url: "/create_sqs",
+                    type: "POST",
+                    contentType: "application/json",
+                    data: JSON.stringify(formData),
+                    success: function(response){
+                        $("#result").html("<p>" + response.message + "<br>Queue URL: " + response.queue_url + "</p>");
+                    },
+                    error: function(xhr, status, error){
+                        var errorMessage = xhr.status + ': ' + xhr.statusText
+                        $("#result").html("<p>Error - " + errorMessage + "</p>");
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

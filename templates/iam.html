@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IAM Management</title>
+    <style>
+        body {
+    font-family: Monospace;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
+    text-align: center;
+    background-image: radial-gradient(black 1px, transparent 0);
+    background-size: 40px 40px;
+}
+
+h1 {
+    color: Black;
+    padding: 20px 0;
+    margin: 0;
+}
+
+.container {
+    width: 100%;
+    max-width: 600px;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: white;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+}
+
+form {
+    margin-bottom: 20px;
+}
+
+label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+}
+
+input {
+    width: 50%;
+    padding: 8px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+button {
+    width: 30%;
+    padding: 10px;
+    background-color: #007bff;
+    font-family: Monospace;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+.alert {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 10px 20px;
+    color: white;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+}
+
+.alert-info {
+    background-color: #2196f3;
+}
+
+.alert-success {
+    background-color: #4CAF50;
+}
+
+.alert-danger {
+    background-color: #f44336;
+}
+
+    </style>
+</head>
+<body>
+    <h1>AWS IAM Management</h1>
+    <div class="container">
+        <form id="createUserForm">
+            <label for="username">Create User:</label>
+            <input type="text" id="username" name="username" required>
+            <button type="submit">Create User</button>
+        </form>
+
+        <form id="deleteUserForm">
+            <label for="deleteUsername">Delete User:</label>
+            <input type="text" id="deleteUsername" name="deleteUsername" required>
+            <button type="submit">Delete User</button>
+        </form>
+
+        <button id="listUsersButton">List Users</button>
+        <div id="usersList"></div>
+    </div>
+
+    <div class="container">
+        <form id="createGroupForm">
+            <label for="groupname">Create Group:</label>
+            <input type="text" id="groupname" name="groupname" required>
+            <button type="submit">Create Group</button>
+        </form>
+
+        <form id="deleteGroupForm">
+            <label for="deleteGroupname">Delete Group:</label>
+            <input type="text" id="deleteGroupname" name="deleteGroupname" required>
+            <button type="submit">Delete Group</button>
+        </form>
+
+        <button id="listGroupsButton">List Groups</button>
+        <div id="groupsList"></div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+    const createUserForm = document.getElementById('createUserForm');
+    const deleteUserForm = document.getElementById('deleteUserForm');
+    const listUsersButton = document.getElementById('listUsersButton');
+    const usersList = document.getElementById('usersList');
+
+    const createGroupForm = document.getElementById('createGroupForm');
+    const deleteGroupForm = document.getElementById('deleteGroupForm');
+    const listGroupsButton = document.getElementById('listGroupsButton');
+    const groupsList = document.getElementById('groupsList');
+
+    createUserForm.addEventListener('submit', function (e) {
+        e.preventDefault();
+        const username = document.getElementById('username').value;
+        fetch('/create_user', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ username })
+        })
+        .then(response => response.json())
+        .then(data => showAlert(data.message, 'success'))
+        .catch(error => showAlert(error.message, 'danger'));
+    });
+
+    deleteUserForm.addEventListener('submit', function (e) {
+        e.preventDefault();
+        const username = document.getElementById('deleteUsername').value;
+        fetch('/delete_user', {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ username })
+        })
+        .then(response => response.json())
+        .then(data => showAlert(data.message, 'success'))
+        .catch(error => showAlert(error.message, 'danger'));
+    });
+
+    listUsersButton.addEventListener('click', function () {
+        fetch('/list_users')
+        .then(response => response.json())
+        .then(data => {
+            usersList.innerHTML = data.users.map(user => `<p>${user.UserName}</p>`).join('');
+        })
+        .catch(error => showAlert(error.message, 'danger'));
+    });
+
+    createGroupForm.addEventListener('submit', function (e) {
+        e.preventDefault();
+        const groupname = document.getElementById('groupname').value;
+        fetch('/create_group', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ groupname })
+        })
+        .then(response => response.json())
+        .then(data => showAlert(data.message, 'success'))
+        .catch(error => showAlert(error.message, 'danger'));
+    });
+
+    deleteGroupForm.addEventListener('submit', function (e) {
+        e.preventDefault();
+        const groupname = document.getElementById('deleteGroupname').value;
+        fetch('/delete_group', {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ groupname })
+        })
+        .then(response => response.json())
+        .then(data => showAlert(data.message, 'success'))
+        .catch(error => showAlert(error.message, 'danger'));
+    });
+
+    listGroupsButton.addEventListener('click', function () {
+        fetch('/list_groups')
+        .then(response => response.json())
+        .then(data => {
+            groupsList.innerHTML = data.groups.map(group => `<p>${group.GroupName}</p>`).join('');
+        })
+        .catch(error => showAlert(error.message, 'danger'));
+    });
+
+    function showAlert(message, type) {
+        const alertBox = document.createElement('div');
+        alertBox.className = `alert alert-${type}`;
+        alertBox.innerText = message;
+        alertBox.style.position = 'fixed';
+        alertBox.style.top = '20px';
+        alertBox.style.left = '50%';
+        alertBox.style.transform = 'translateX(-50%)';
+        alertBox.style.padding = '10px 20px';
+        alertBox.style.color = 'white';
+        alertBox.style.borderRadius = '4px';
+        alertBox.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.2)';
+        document.body.appendChild(alertBox);
+        setTimeout(() => {
+            alertBox.remove();
+        }, 3000);
+    }
+});
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CodeDeploy Management</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>CodeDeploy Management</h1>
+
+        <h2>Create Application</h2>
+        <form id="create-application-form">
+            <input type="text" id="application_name" placeholder="Application Name" required>
+            <button type="submit">Create Application</button>
+        </form>
+        <div id="create-application-response"></div>
+
+        <h2>List Applications</h2>
+        <button id="list-applications">List Applications</button>
+        <div id="list-applications-response"></div>
+
+        <h2>Delete Application</h2>
+        <form id="delete-application-form">
+            <input type="text" id="delete_application_name" placeholder="Application Name" required>
+            <button type="submit">Delete Application</button>
+        </form>
+        <div id="delete-application-response"></div>
+    </div>
+    <script>
+        document.getElementById('create-application-form').addEventListener('submit', function (event) {
+    event.preventDefault();
+    const application_name = document.getElementById('application_name').value;
+
+    fetch('/codedeploy/create-application', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ application_name })
+    })
+        .then(response => response.json())
+        .then(data => {
+            const responseDiv = document.getElementById('create-application-response');
+            responseDiv.textContent = JSON.stringify(data, null, 2);
+        })
+        .catch(error => {
+            const responseDiv = document.getElementById('create-application-response');
+            responseDiv.textContent = error;
+            responseDiv.classList.add('error');
+        });
+});
+
+document.getElementById('list-applications').addEventListener('click', function () {
+    fetch('/codedeploy/list-applications')
+        .then(response => response.json())
+        .then(data => {
+            const responseDiv = document.getElementById('list-applications-response');
+            responseDiv.textContent = JSON.stringify(data, null, 2);
+        })
+        .catch(error => {
+            const responseDiv = document.getElementById('list-applications-response');
+            responseDiv.textContent = error;
+            responseDiv.classList.add('error');
+        });
+});
+
+document.getElementById('delete-application-form').addEventListener('submit', function (event) {
+    event.preventDefault();
+    const application_name = document.getElementById('delete_application_name').value;
+
+    fetch('/codedeploy/delete-application', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ application_name })
+    })
+        .then(response => response.json())
+        .then(data => {
+            const responseDiv = document.getElementById('delete-application-response');
+            responseDiv.textContent = JSON.stringify(data, null, 2);
+        })
+        .catch(error => {
+            const responseDiv = document.getElementById('delete-application-response');
+            responseDiv.textContent = error;
+            responseDiv.classList.add('error');
+        });
+});
+
+    </script>
+</body>
+</html>

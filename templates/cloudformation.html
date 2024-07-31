@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AWS CloudFormation Management</title>
+    <style>
+        body {
+    font-family: Monospace;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
+    text-align: center;
+    background-image: radial-gradient(circle, lightgray, gray);
+    height: 100vh;
+}
+
+h1 {
+    margin-top: 20px;
+}
+
+.container {
+    margin-top: 40px;
+}
+
+form {
+    margin-bottom: 20px;
+}
+
+input[type="text"], input[type="file"] {
+    margin: 10px;
+    padding: 5px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+}
+
+button {
+    padding: 5px 10px;
+    border: none;
+    background-color: #4CAF50;
+    color: white;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+button:hover {
+    background-color: #45a049;
+}
+
+.alert {
+    z-index: 1000;
+}
+
+.alert-success {
+    background-color: #4CAF50;
+}
+
+.alert-danger {
+    background-color: #f44336;
+}
+
+    </style>
+</head>
+<body>
+    <h1>AWS CloudFormation Management</h1>
+    <div class="container">
+        <form id="createStackForm" enctype="multipart/form-data">
+            <label for="stackName">Create Stack:</label>
+            <input type="text" id="stackName" name="stackName" required>
+            <input type="file" id="templateFile" name="templateFile" required>
+            <button type="submit">Create Stack</button>
+        </form>
+
+        <form id="deleteStackForm">
+            <label for="deleteStackName">Delete Stack:</label>
+            <input type="text" id="deleteStackName" name="deleteStackName" required>
+            <button type="submit">Delete Stack</button>
+        </form>
+
+        <button id="listStacksButton">List Stacks</button>
+        <div id="stacksList"></div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+    const createStackForm = document.getElementById('createStackForm');
+    const deleteStackForm = document.getElementById('deleteStackForm');
+    const listStacksButton = document.getElementById('listStacksButton');
+    const stacksList = document.getElementById('stacksList');
+
+    createStackForm.addEventListener('submit', function (e) {
+        e.preventDefault();
+        const formData = new FormData(createStackForm);
+        fetch('/create_stack', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => showAlert(data.message, 'success'))
+        .catch(error => showAlert(error.message, 'danger'));
+    });
+
+    deleteStackForm.addEventListener('submit', function (e) {
+        e.preventDefault();
+        const stackName = document.getElementById('deleteStackName').value;
+        fetch('/delete_stack', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ stack_name: stackName })
+        })
+        .then(response => response.json())
+        .then(data => showAlert(data.message, 'success'))
+        .catch(error => showAlert(error.message, 'danger'));
+    });
+
+    listStacksButton.addEventListener('click', function () {
+        fetch('/list_stacks')
+        .then(response => response.json())
+        .then(data => {
+            stacksList.innerHTML = data.map(stack => `<p>${stack.StackName}: ${stack.StackStatus}</p>`).join('');
+        })
+        .catch(error => showAlert(error.message, 'danger'));
+    });
+
+    function showAlert(message, type) {
+        const alertBox = document.createElement('div');
+        alertBox.className = `alert alert-${type}`;
+        alertBox.innerText = message;
+        alertBox.style.position = 'fixed';
+        alertBox.style.top = '20px';
+        alertBox.style.left = '50%';
+        alertBox.style.transform = 'translateX(-50%)';
+        alertBox.style.padding = '10px 20px';
+        alertBox.style.color = 'white';
+        alertBox.style.borderRadius = '4px';
+        alertBox.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.2)';
+        document.body.appendChild(alertBox);
+        setTimeout(() => {
+            alertBox.remove();
+        }, 3000);
+    }
+});
+
+    </script>
+</body>
+</html>

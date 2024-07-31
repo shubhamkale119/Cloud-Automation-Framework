@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CodeCommit Management</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>CodeCommit Management</h1>
+
+        <h2>Create Repository</h2>
+        <form id="create-repo-form">
+            <input type="text" id="repositoryName" placeholder="Repository Name" required>
+            <input type="text" id="repositoryDescription" placeholder="Repository Description">
+            <button type="submit">Create Repository</button>
+        </form>
+        <div id="create-repo-response"></div>
+
+        <h2>Get Repository</h2>
+        <form id="get-repo-form">
+            <input type="text" id="get-repositoryName" placeholder="Repository Name" required>
+            <button type="submit">Get Repository</button>
+        </form>
+        <div id="get-repo-response"></div>
+
+        <h2>List Repositories</h2>
+        <button id="list-repos">List Repositories</button>
+        <div id="list-repos-response"></div>
+
+        <h2>Delete Repository</h2>
+        <form id="delete-repo-form">
+            <input type="text" id="delete-repositoryName" placeholder="Repository Name" required>
+            <button type="submit">Delete Repository</button>
+        </form>
+        <div id="delete-repo-response"></div>
+    </div>
+    <script>
+        document.getElementById('create-repo-form').addEventListener('submit', function (event) {
+    event.preventDefault();
+    const repositoryName = document.getElementById('repositoryName').value;
+    const repositoryDescription = document.getElementById('repositoryDescription').value;
+
+    fetch('/create-repo', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ repositoryName, repositoryDescription })
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.message) {
+                alert(data.message);
+            } else {
+                alert('Error creating repository: ' + JSON.stringify(data.error));
+            }
+            const responseDiv = document.getElementById('create-repo-response');
+            responseDiv.textContent = JSON.stringify(data, null, 2);
+        })
+        .catch(error => {
+            alert('Error: ' + error);
+            const responseDiv = document.getElementById('create-repo-response');
+            responseDiv.textContent = error;
+            responseDiv.classList.add('error');
+        });
+});
+
+document.getElementById('get-repo-form').addEventListener('submit', function (event) {
+    event.preventDefault();
+    const repositoryName = document.getElementById('get-repositoryName').value;
+
+    fetch(`/get-repo?repositoryName=${repositoryName}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.message) {
+                alert(data.message);
+            } else {
+                alert('Error fetching repository: ' + JSON.stringify(data.error));
+            }
+            const responseDiv = document.getElementById('get-repo-response');
+            responseDiv.textContent = JSON.stringify(data, null, 2);
+        })
+        .catch(error => {
+            alert('Error: ' + error);
+            const responseDiv = document.getElementById('get-repo-response');
+            responseDiv.textContent = error;
+            responseDiv.classList.add('error');
+        });
+});
+
+document.getElementById('list-repos').addEventListener('click', function () {
+    fetch('/list-repos')
+        .then(response => response.json())
+        .then(data => {
+            if (data.message) {
+                alert(data.message);
+            } else {
+                alert('Error listing repositories: ' + JSON.stringify(data.error));
+            }
+            const responseDiv = document.getElementById('list-repos-response');
+            responseDiv.textContent = JSON.stringify(data, null, 2);
+        })
+        .catch(error => {
+            alert('Error: ' + error);
+            const responseDiv = document.getElementById('list-repos-response');
+            responseDiv.textContent = error;
+            responseDiv.classList.add('error');
+        });
+});
+
+document.getElementById('delete-repo-form').addEventListener('submit', function (event) {
+    event.preventDefault();
+    const repositoryName = document.getElementById('delete-repositoryName').value;
+
+    fetch('/delete-repo', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ repositoryName })
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.message) {
+                alert(data.message);
+            } else {
+                alert('Error deleting repository: ' + JSON.stringify(data.error));
+            }
+            const responseDiv = document.getElementById('delete-repo-response');
+            responseDiv.textContent = JSON.stringify(data, null, 2);
+        })
+        .catch(error => {
+            alert('Error: ' + error);
+            const responseDiv = document.getElementById('delete-repo-response');
+            responseDiv.textContent = error;
+            responseDiv.classList.add('error');
+        });
+});
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Load Balancer Management</title>
+    <style>
+        body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 0;
+}
+
+.container {
+    width: 50%;
+    margin: 0 auto;
+    background: #fff;
+    padding: 20px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+h1 {
+    text-align: center;
+    color: #333;
+}
+
+form {
+    margin-bottom: 20px;
+}
+
+input, select, textarea {
+    width: 100%;
+    padding: 10px;
+    margin: 5px 0 10px 0;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+button {
+    width: 100%;
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #45a049;
+}
+
+#describe-response, #create-response, #delete-response {
+    margin-top: 20px;
+    padding: 10px;
+    border-radius: 4px;
+    background-color: #e7f3fe;
+    color: #2c3e50;
+}
+
+#describe-response.error, #create-response.error, #delete-response.error {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Load Balancer Management</h1>
+
+        <h2>Create Load Balancer</h2>
+        <form id="create-load-balancer-form">
+            <input type="text" id="name" placeholder="Name" required>
+            <input type="text" id="subnets" placeholder="Subnets (comma separated)" required>
+            <input type="text" id="security_groups" placeholder="Security Groups (comma separated)">
+            <select id="scheme">
+                <option value="internet-facing">Internet-facing</option>
+                <option value="internal">Internal</option>
+            </select>
+            <textarea id="tags" placeholder="Tags (key=value, comma separated)"></textarea>
+            <button type="submit">Create Load Balancer</button>
+        </form>
+        <div id="create-response"></div>
+
+        <h2>Describe Load Balancers</h2>
+        <button id="describe-load-balancers">Describe Load Balancers</button>
+        <div id="describe-response"></div>
+
+        <h2>Delete Load Balancer</h2>
+        <form id="delete-load-balancer-form">
+            <input type="text" id="load_balancer_arn" placeholder="Load Balancer ARN" required>
+            <button type="submit">Delete Load Balancer</button>
+        </form>
+        <div id="delete-response"></div>
+    </div>
+    <script>
+        document.getElementById('create-load-balancer-form').addEventListener('submit', function (event) {
+    event.preventDefault();
+    const name = document.getElementById('name').value;
+    const subnets = document.getElementById('subnets').value.split(',');
+    const security_groups = document.getElementById('security_groups').value.split(',');
+    const scheme = document.getElementById('scheme').value;
+    const tags = document.getElementById('tags').value.split(',').map(tag => {
+        const [Key, Value] = tag.split('=');
+        return { Key, Value };
+    });
+
+    fetch('/create-load-balancer', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, subnets, security_groups, scheme, tags })
+    })
+        .then(response => response.json())
+        .then(data => {
+            const responseDiv = document.getElementById('create-response');
+            responseDiv.textContent = JSON.stringify(data, null, 2);
+            responseDiv.classList.remove('error');
+        })
+        .catch(error => {
+            const responseDiv = document.getElementById('create-response');
+            responseDiv.textContent = error;
+            responseDiv.classList.add('error');
+        });
+});
+
+document.getElementById('describe-load-balancers').addEventListener('click', function () {
+    fetch('/describe-load-balancers')
+        .then(response => response.json())
+        .then(data => {
+            const responseDiv = document.getElementById('describe-response');
+            responseDiv.textContent = JSON.stringify(data, null, 2);
+            responseDiv.classList.remove('error');
+        })
+        .catch(error => {
+            const responseDiv = document.getElementById('describe-response');
+            responseDiv.textContent = error;
+            responseDiv.classList.add('error');
+        });
+});
+
+document.getElementById('delete-load-balancer-form').addEventListener('submit', function (event) {
+    event.preventDefault();
+    const load_balancer_arn = document.getElementById('load_balancer_arn').value;
+
+    fetch('/delete-load-balancer', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ load_balancer_arn })
+    })
+        .then(response => response.json())
+        .then(data => {
+            const responseDiv = document.getElementById('delete-response');
+            responseDiv.textContent = JSON.stringify(data, null, 2);
+            responseDiv.classList.remove('error');
+        })
+        .catch(error => {
+            const responseDiv = document.getElementById('delete-response');
+            responseDiv.textContent = error;
+            responseDiv.classList.add('error');
+        });
+});
+
+    </script>
+</body>
+</html>
