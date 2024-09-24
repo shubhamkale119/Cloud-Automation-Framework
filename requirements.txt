@@ -1,0 +1,6 @@
+boto3==1.26.128
+pyotp==2.8.0
+pymongo==4.4.1
+Flask==2.3.2
+qrcode=7.3.1
+smtplib3==0.4.1
