@@ -1,0 +1,51 @@
+version: "3.8"
+
+services:
+  app:
+    build: .
+    container_name: flask_app
+    ports:
+      - "5000:5000"
+
+    depends_on:
+      - mongodb
+    environment:
+      - MONGO_URI="mongodb://mongodb:27017/CAF"
+
+    networks:
+      - webnet
+
+
+
+  mongodb:
+    image: mongo:6.0
+    container_name: mongo_db
+    volumes:
+      - mongo_data:/data/db
+
+    ports:
+      - "27017:27017"
+
+
+    networks:
+      - webnet
+
+  nginx:
+    image: nginx:latest
+    container_name: nginx_proxy
+    ports:
+      - "80:80"
+
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - app
+
+    networks:
+      - webnet
+
+volumes:
+  mongo_data:
+
+networks:
+  webnet:
